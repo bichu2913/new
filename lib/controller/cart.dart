@@ -24,6 +24,10 @@ class CartController {
     _cartModel = CartModel(cartProducts: cartProducts, quantities: quantities);
    _cartModelController.add(_cartModel);  
   }
+  
+
+  
+
 
   Future<List<int>> getQuantitiesForProducts(List<DocumentSnapshot> cartProducts) async {
     List<int> updatedQuantities = [];
@@ -47,10 +51,7 @@ Future<void> updateQuantityInDatabase(String productId, int quantity) async {
     updateCartData(); // Update the cart data after quantity is updated
   }
 
-   Future<void> deleteProductFromCart(DocumentSnapshot productSnapshot) async {
-    await cartManager.deleteItemFromCart(productSnapshot);
-    updateCartData(); // Update the cart data after product is deleted
-  }
+
 }
 class CartManager {
   final CollectionReference usersCollection =
@@ -87,6 +88,35 @@ class CartManager {
     print('Error toggling cart status: $e');
   }
 }
+ Future<List<int>> getQuantitiesForProduc(List<String> productIds) async {
+    List<int> updatedQuantities = [];
+
+    try {
+      String? userId = 'bichuamz@gmail.com'; // Replace this with the actual user ID.
+      DocumentSnapshot<Object?> userSnapshot = await usersCollection.doc(userId).get();
+
+      if (userSnapshot.exists) {
+        Map<String, dynamic>? userData = userSnapshot.data() as Map<String, dynamic>?;
+
+        if (userData != null && userData.containsKey('cart')) {
+          List<dynamic> cart = userData['cart'] as List<dynamic>;
+
+          for (String productId in productIds) {
+            int quantity = 0;
+            int index = cart.indexWhere((item) => item['productId'] == productId);
+            if (index != -1) {
+              quantity = cart[index]['quantity'] as int? ?? 0;
+            }
+            updatedQuantities.add(quantity);
+          }
+        }
+      }
+    } catch (e) {
+      print('Error getting quantities: $e');
+    }
+
+    return updatedQuantities;
+  }
 Future<void> deleteItemFromCart(DocumentSnapshot<Object?> productSnapshot) async {
   try {
     String? userId = 'bichuamz@gmail.com';
@@ -168,9 +198,7 @@ Future<void> updateQuantity(String productId, int quantity) async {
 
 
 
- void printCartLength(List<dynamic> cart) {
-  print('Cart Length: ${cart.length}');
-}
+ 
 
 Future<List<DocumentSnapshot>> getCartData() async {
   try {
@@ -184,7 +212,7 @@ Future<List<DocumentSnapshot>> getCartData() async {
       if (userData != null && userData.containsKey('cart')) {
         List<dynamic> cart = userData['cart'] as List<dynamic>;
 
-        printCartLength(cart); // Call the function to print the cart length
+        
 
         List<DocumentSnapshot> products = await firebaseService.getAllfruitsvegetables();
 

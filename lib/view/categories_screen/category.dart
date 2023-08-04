@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sunrule/bloc/cart/cart_bloc.dart';
 
 import 'methods.dart';
 
@@ -7,6 +9,7 @@ class Allcategory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    BlocProvider.of<CartBloc>(context).add(Quantities());
     List<String> assetImageUrls = [
  'assets/kitchen.png','assets/pet.png','assets/gift.png','assets/makeup.png','assets/baby.png','assets/organic.png','assets/party.png', 'assets/fitness.png'
 ];

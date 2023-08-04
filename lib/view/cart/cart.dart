@@ -1,47 +1,58 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sunrule/controller/cart.dart';
+import 'package:sunrule/model/cart_model.dart';
+import 'package:sunrule/view/freshfruits/freshfruit.dart';
 
-class cart extends StatefulWidget {
-  const cart({super.key});
+class Cart extends StatefulWidget {
+  const Cart({super.key});
 
   @override
-  State<cart> createState() => _cartState();
+  State<Cart> createState() => _CartState();
 }
 
-class _cartState extends State<cart> {
-  final CartManager cartManager = CartManager();
-  late Future<List<DocumentSnapshot<Object?>>> _cartDataFuture;
+class _CartState extends State<Cart> {
+  final CartController cartController = CartController();
 
   @override
   void initState() {
-    super.initState();
-    _cartDataFuture = cartManager.getCartData();
-  }
-
-  Future<void> _refreshCartData() async {
-    setState(() {
-      _cartDataFuture = cartManager.getCartData();
-    });
+    super.initState();    
+    cartController.initializeCartData();
   }
 
   @override
   Widget build(BuildContext context) {
+    void navigateTofresh() {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const Freshfruits(),
+        ),
+      );
+    }
+
     return Scaffold(
-      
-      appBar: AppBar(backgroundColor: const Color.fromARGB(255, 34, 11, 78),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 34, 11, 78),
+        leading: IconButton(
+          onPressed: () => navigateTofresh(),
+          icon: const Icon(Icons.arrow_back_ios_rounded),
+        ),
         title: const Center(child: Text('Cart')),
-        actions: [ElevatedButton(onPressed: () {
-          
-        },style: ElevatedButton.styleFrom(
-    backgroundColor: const Color.fromARGB(255, 34, 11, 78), // Change the background color here
-    // You can also customize other button properties, such as text color, padding, shape, etc.
-  ), child: const Text("ADD"))],
+        actions: [
+          ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(255, 34, 11, 78),
+            ),
+            child: const Text("ADD"),
+          )
+        ],
       ),
       body: RefreshIndicator(
-        onRefresh: _refreshCartData,
-        child: FutureBuilder<List<DocumentSnapshot<Object?>>>(
-          future: _cartDataFuture,
+        onRefresh: cartController.updateCartData,
+        child: StreamBuilder<CartModel>(
+          stream: cartController.cartModelStream,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -55,22 +66,23 @@ class _cartState extends State<cart> {
               );
             }
 
-            List<DocumentSnapshot<Object?>> cartProducts = snapshot.data ?? [];
+            CartModel cartModel = snapshot.data!;
 
-            if (cartProducts.isEmpty) {
+            if (cartModel.cartProducts.isEmpty) {
               return const Center(
                 child: Text('No products in cart'),
               );
             }
 
-            return CartProductList(cartProducts,
-                refreshCartData: _refreshCartData);
+            return CartProductList(cartModel.cartProducts, refreshCartData: cartController.updateCartData);
           },
         ),
       ),
     );
   }
 }
+
+
 
 class CartProductList extends StatefulWidget {
   final List<DocumentSnapshot<Object?>> cartProducts;
@@ -212,9 +224,9 @@ class _CartProductListState extends State<CartProductList> {
                       title: Row(  
                         children: [
                           Expanded(
-                            child: Text( 
+                            child: Text(  
                               name,
-                              textAlign: TextAlign.center,
+                              textAlign: TextAlign.center,maxLines: 2,
                             ),
                           ),
                            Container(decoration: BoxDecoration(border: Border.all(color: Colors.red), ), height: 29,      

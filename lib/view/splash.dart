@@ -15,6 +15,7 @@ class SplashScreenState extends State<SplashScreen> {
   @override
    void initState() {
     allcatgory(context);
+    
     super.initState();
   }
 
@@ -25,10 +26,10 @@ class SplashScreenState extends State<SplashScreen> {
         Container(
           decoration: const BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/splash.avif'),
+              image: AssetImage('assets/sunrule2.png'),
               fit: BoxFit.fitHeight,
             ),
-          ),
+          ), 
         ),
         
       ],
